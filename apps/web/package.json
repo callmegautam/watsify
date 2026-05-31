@@ -1,0 +1,42 @@
+{
+  "name": "web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "react-router build",
+    "dev": "react-router dev",
+    "start": "react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc"
+  },
+  "dependencies": {
+    "@react-router/fs-routes": "^7.14.1",
+    "@react-router/node": "^7.14.1",
+    "@react-router/serve": "^7.14.1",
+    "@tanstack/react-form": "^1.28.0",
+    "@watsify/env": "workspace:*",
+    "@watsify/ui": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "isbot": "^5.1.39",
+    "lucide-react": "^1.8.0",
+    "next-themes": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-router": "^7.14.1",
+    "sonner": "^2.0.7",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@react-router/dev": "^7.14.1",
+    "@tailwindcss/vite": "^4.2.2",
+    "@types/node": "^20",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@watsify/config": "workspace:*",
+    "react-router-devtools": "^1.1.0",
+    "tailwindcss": "^4.2.2",
+    "typescript": "catalog:",
+    "vite": "^8.0.8",
+    "vite-tsconfig-paths": "^6.1.1"
+  }
+}

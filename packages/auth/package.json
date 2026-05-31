@@ -1,0 +1,24 @@
+{
+  "name": "@watsify/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@watsify/db": "workspace:*",
+    "@watsify/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@watsify/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,3 @@
+{
+  "extends": "@watsify/config/tsconfig.base.json"
+}
