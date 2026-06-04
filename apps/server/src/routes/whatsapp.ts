@@ -1,20 +1,17 @@
 import { Router } from "express";
 import { waManager } from "@/whatsapp/manager";
-import { requireAuth } from "@/middleware/auth";
 
 const router: Router = Router();
 
-router.use(requireAuth);
+const DEFAULT_USER_ID = "default";
 
-router.get("/status", (req, res) => {
-  const userId = (req as any).userId;
-  res.json(waManager.getStatus(userId));
+router.get("/status", (_req, res) => {
+  res.json(waManager.getStatus(DEFAULT_USER_ID));
 });
 
-router.post("/init", async (req, res) => {
-  const userId = (req as any).userId;
+router.post("/init", async (_req, res) => {
   try {
-    const session = await waManager.getOrCreateSession(userId);
+    const session = await waManager.getOrCreateSession(DEFAULT_USER_ID);
     res.json({ success: true, status: session.getStatus() });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -22,7 +19,6 @@ router.post("/init", async (req, res) => {
 });
 
 router.post("/send", async (req, res) => {
-  const userId = (req as any).userId;
   const { to, message } = req.body;
 
   if (!to || !message) {
@@ -30,7 +26,7 @@ router.post("/send", async (req, res) => {
     return;
   }
 
-  const session = waManager.getSession(userId);
+  const session = waManager.getSession(DEFAULT_USER_ID);
   if (!session) {
     res
       .status(400)
@@ -47,7 +43,6 @@ router.post("/send", async (req, res) => {
 });
 
 router.post("/schedule", async (req, res) => {
-  const userId = (req as any).userId;
   const { to, message, scheduledAt } = req.body;
 
   if (!to || !message || !scheduledAt) {
@@ -57,7 +52,7 @@ router.post("/schedule", async (req, res) => {
     return;
   }
 
-  const session = waManager.getSession(userId);
+  const session = waManager.getSession(DEFAULT_USER_ID);
   if (!session) {
     res
       .status(400)
@@ -67,7 +62,7 @@ router.post("/schedule", async (req, res) => {
 
   try {
     const scheduled = await waManager.scheduler.schedule(
-      userId,
+      DEFAULT_USER_ID,
       to,
       message,
       new Date(scheduledAt),
@@ -79,9 +74,8 @@ router.post("/schedule", async (req, res) => {
   }
 });
 
-router.get("/scheduled", async (req, res) => {
-  const userId = (req as any).userId;
-  const messages = await waManager.scheduler.getScheduledForUser(userId);
+router.get("/scheduled", async (_req, res) => {
+  const messages = await waManager.scheduler.getScheduledForUser(DEFAULT_USER_ID);
   res.json({ messages });
 });
 
@@ -91,7 +85,6 @@ router.get("/admin/scheduled", async (_req, res) => {
 });
 
 router.post("/cancel-scheduled", async (req, res) => {
-  const userId = (req as any).userId;
   const { messageId } = req.body;
 
   if (!messageId) {
@@ -100,7 +93,7 @@ router.post("/cancel-scheduled", async (req, res) => {
   }
 
   try {
-    await waManager.scheduler.cancel(userId, messageId);
+    await waManager.scheduler.cancel(DEFAULT_USER_ID, messageId);
     res.json({ success: true });
   } catch (err: any) {
     res.status(400).json({ error: err.message });

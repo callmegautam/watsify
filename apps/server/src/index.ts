@@ -1,8 +1,5 @@
 import waRoutes from "@/routes/whatsapp";
 import { waManager } from "@/whatsapp/manager";
-import { auth } from "@watsify/auth";
-import { env } from "@watsify/env/server";
-import { toNodeHandler } from "better-auth/node";
 import cors from "cors";
 import express from "express";
 
@@ -10,14 +7,10 @@ const app = express();
 
 app.use(
   cors({
-    origin: env.CORS_ORIGIN,
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: "http://localhost:5173",
     credentials: true,
   }),
 );
-
-app.all("/api/auth{/*path}", toNodeHandler(auth));
 
 app.use(express.json());
 

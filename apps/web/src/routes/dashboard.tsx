@@ -1,26 +1,20 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
-
-import { authClient } from "@/lib/auth-client";
+import WhatsappStatus from "@/components/whatsapp-status";
+import SendMessage from "@/components/send-message";
+import ScheduleMessage from "@/components/schedule-message";
+import ScheduledMessages from "@/components/scheduled-messages";
 
 export default function Dashboard() {
-  const { data: session, isPending } = authClient.useSession();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!session && !isPending) {
-      navigate("/login");
-    }
-  }, [session, isPending, navigate]);
-
-  if (isPending) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <div>
-      <h1>Dashboard</h1>
-      <p>Welcome {session?.user.name}</p>
+    <div className="flex flex-col gap-6 p-4">
+      <h1 className="text-lg font-medium">WhatsApp Manager</h1>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <WhatsappStatus />
+        <div className="flex flex-col gap-6">
+          <SendMessage />
+          <ScheduleMessage />
+        </div>
+      </div>
+      <ScheduledMessages />
     </div>
   );
 }
