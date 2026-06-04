@@ -13,16 +13,21 @@
     "@watsify/auth": "workspace:*",
     "@watsify/db": "workspace:*",
     "@watsify/env": "workspace:*",
+    "@whiskeysockets/baileys": "^7.0.0-rc13",
     "better-auth": "catalog:",
     "cors": "^2.8.5",
     "dotenv": "catalog:",
     "express": "^5.1.0",
+    "pino": "^10.3.1",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
+    "@types/qrcode": "^1.5.6",
     "@watsify/config": "workspace:*",
     "tsdown": "^0.21.9",
     "typescript": "catalog:"

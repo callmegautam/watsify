@@ -3,6 +3,8 @@ import { env } from "@watsify/env/server";
 import { toNodeHandler } from "better-auth/node";
 import cors from "cors";
 import express from "express";
+import waRoutes from "@/routes/whatsapp";
+import { waManager } from "@/whatsapp/manager";
 
 const app = express();
 
@@ -19,9 +21,13 @@ app.all("/api/auth{/*path}", toNodeHandler(auth));
 
 app.use(express.json());
 
+app.use("/api/whatsapp", waRoutes);
+
 app.get("/", (_req, res) => {
   res.status(200).send("OK");
 });
+
+waManager.init();
 
 app.listen(3000, () => {
   console.log("Server is running on http://localhost:3000");

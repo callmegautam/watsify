@@ -46,6 +46,7 @@ lerna-debug.log*
 # misc
 .DS_Store
 *.pem
+wa_auth/
 
 # local db
 *.db*
