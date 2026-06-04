@@ -28,6 +28,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
     "@types/qrcode": "^1.5.6",
+    "@types/qrcode-terminal": "^0.12.2",
     "@watsify/config": "workspace:*",
     "tsdown": "^0.21.9",
     "typescript": "catalog:"

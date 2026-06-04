@@ -1,10 +1,10 @@
+import waRoutes from "@/routes/whatsapp";
+import { waManager } from "@/whatsapp/manager";
 import { auth } from "@watsify/auth";
 import { env } from "@watsify/env/server";
 import { toNodeHandler } from "better-auth/node";
 import cors from "cors";
 import express from "express";
-import waRoutes from "@/routes/whatsapp";
-import { waManager } from "@/whatsapp/manager";
 
 const app = express();
 

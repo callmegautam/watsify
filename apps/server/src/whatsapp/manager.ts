@@ -2,10 +2,10 @@ import makeWASocket, {
   DisconnectReason,
   useMultiFileAuthState,
 } from "@whiskeysockets/baileys";
+import path from "path";
 import pino from "pino";
 import QRCode from "qrcode";
 import qrcode from "qrcode-terminal";
-import path from "path";
 
 export type WaStatus = "connecting" | "connected" | "disconnected";
 
