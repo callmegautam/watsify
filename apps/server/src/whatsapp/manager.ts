@@ -1,87 +1,74 @@
-import makeWASocket, {
-  DisconnectReason,
-  useMultiFileAuthState,
-} from "@whiskeysockets/baileys";
+import fs from "fs";
 import path from "path";
-import pino from "pino";
-import QRCode from "qrcode";
-import qrcode from "qrcode-terminal";
+import { UserSession } from "./user-session";
+import { MessageScheduler } from "./scheduler";
+import type { WaStatus } from "./types";
 
-export type WaStatus = "connecting" | "connected" | "disconnected";
-
-class WhatsAppManager {
-  private socket: ReturnType<typeof makeWASocket> | null = null;
-  private status: WaStatus = "disconnected";
-  private qrCodeBase64: string | null = null;
-  private authDir: string;
+export class WhatsAppManager {
+  private sessions: Map<string, UserSession> = new Map();
+  private authBaseDir: string;
+  readonly scheduler: MessageScheduler;
 
   constructor() {
-    this.authDir = path.join(process.cwd(), "wa_auth");
+    this.authBaseDir = path.join(process.cwd(), "wa_auth");
+    this.scheduler = new MessageScheduler(this.authBaseDir);
   }
 
-  getStatus() {
-    return { status: this.status, qr: this.qrCodeBase64 };
+  async getOrCreateSession(userId: string): Promise<UserSession> {
+    let session = this.sessions.get(userId);
+    if (!session) {
+      session = new UserSession(userId, this.authBaseDir);
+      this.sessions.set(userId, session);
+      await session.init();
+    }
+    return session;
   }
 
-  async init() {
-    const { state, saveCreds } = await useMultiFileAuthState(this.authDir);
+  getSession(userId: string): UserSession | undefined {
+    return this.sessions.get(userId);
+  }
 
-    const logger = pino({ level: "silent" });
+  removeSession(userId: string): void {
+    this.sessions.delete(userId);
+  }
 
-    this.socket = makeWASocket({
-      auth: state,
-      logger,
-    });
+  getStatus(userId: string) {
+    const session = this.sessions.get(userId);
+    if (!session) {
+      return { status: "disconnected" as WaStatus, qr: null, userId };
+    }
+    return session.getStatus();
+  }
 
-    this.socket.ev.on("connection.update", async (update) => {
-      const { connection, lastDisconnect, qr } = update;
-
-      if (qr) {
-        this.qrCodeBase64 = await QRCode.toDataURL(qr);
-        console.log("\nScan this QR code with WhatsApp to log in:\n");
-        qrcode.generate(qr, { small: true });
-      }
-
-      if (connection === "connecting") {
-        this.status = "connecting";
-      } else if (connection === "close") {
-        const statusCode = (lastDisconnect?.error as any)?.output?.statusCode;
-        const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-        this.status = "disconnected";
-        this.qrCodeBase64 = null;
-
-        if (shouldReconnect) {
-          this.init();
+  async initExistingSessions(): Promise<void> {
+    try {
+      const entries = fs.readdirSync(this.authBaseDir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          const credsPath = path.join(
+            this.authBaseDir,
+            entry.name,
+            "creds.json",
+          );
+          if (fs.existsSync(credsPath)) {
+            const session = new UserSession(entry.name, this.authBaseDir);
+            this.sessions.set(entry.name, session);
+            await session.init();
+          }
         }
-      } else if (connection === "open") {
-        this.status = "connected";
-        this.qrCodeBase64 = null;
       }
-    });
-
-    this.socket.ev.on("creds.update", saveCreds);
+    } catch {}
   }
 
-  async sendMessage(to: string, message: string) {
-    if (!this.socket || this.status !== "connected") {
-      throw new Error("WhatsApp not connected");
+  async loadPendingScheduledMessages(): Promise<void> {
+    for (const [userId] of this.sessions) {
+      const session = this.sessions.get(userId);
+      if (session) {
+        await this.scheduler.loadPendingForUser(userId, (to, msg) =>
+          session.sendMessage(to, msg),
+        );
+      }
     }
-
-    const jid = `${to.replace(/[^0-9]/g, "")}@s.whatsapp.net`;
-    await this.socket.sendMessage(jid, { text: message });
-  }
-
-  async scheduleMessage(to: string, message: string, scheduledAt: Date) {
-    const delay = scheduledAt.getTime() - Date.now();
-    if (delay <= 0) {
-      throw new Error("Scheduled time must be in the future");
-    }
-
-    setTimeout(() => {
-      this.sendMessage(to, message).catch((err) => {
-        console.error("Failed to send scheduled message:", err);
-      });
-    }, delay);
   }
 }
 
